@@ -1,0 +1,11 @@
+library drinkwater.globals;
+bool isLoggedIn = false;
+String userPhone = '';
+String userToken = '';
+int userId = 0;
+int currentDeviceId = 0;
+int currentDevicePrice = 0;
+double? liters = 0.0;
+double? summ = 0.0;
+int? order = 0;
+String? currentPaymentMethod = '';
