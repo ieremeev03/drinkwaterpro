@@ -49,10 +49,19 @@ class _ProfilePageState extends StateMVC {
             padding: EdgeInsets.fromLTRB(10, 15, 15, 10),
             child: GestureDetector(
                 onTap: () {
-                  _controller.logout();
+
+                  /*_controller.logout();
                   print('logout');
 
-                  Future.delayed(const Duration(milliseconds: 1000), () {
+                  Navigator.of(context)
+                      .pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (context) => HomePage()
+                    ),
+                        (_) => false,
+                  );*/
+
+                 /* Future.delayed(const Duration(milliseconds: 1000), () {
 
                     setState(() {
                       Navigator.pushAndRemoveUntil(context,
@@ -61,7 +70,7 @@ class _ProfilePageState extends StateMVC {
                         ),(Route<dynamic> route) => false,);
                     });
 
-                  });
+                  });*/
                 },
                 child: FaIcon(FontAwesomeIcons.rightFromBracket,size: 20.0, color: Colors.black,)),
 

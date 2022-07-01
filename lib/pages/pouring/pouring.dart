@@ -122,8 +122,8 @@ class _PouringPageState extends StateMVC with TickerProviderStateMixin  {
           Spacer(),
           Image.asset(
                              'assets/img/logo.png',
-                            // width: _myAnimation.value.width,
-                             //height: _myAnimation.value.height,
+                             width: 150,
+                             height: 150,
                            ),
 
 
@@ -212,7 +212,9 @@ class _PouringPageState extends StateMVC with TickerProviderStateMixin  {
 
 
 
-          Spacer(),
+          SizedBox(
+            height: 35,
+          ),
           Center(
 
             child: Text(
@@ -220,7 +222,9 @@ class _PouringPageState extends StateMVC with TickerProviderStateMixin  {
               textAlign: TextAlign.center,
               style: kStyleTextDefault15,),
           ),
-          Spacer(),
+          SizedBox(
+            height: 25,
+          ),
         ],
       ),
     );

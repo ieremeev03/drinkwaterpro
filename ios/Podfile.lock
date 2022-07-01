@@ -1,5 +1,7 @@
 PODS:
   - Flutter (1.0.0)
+  - flutter_native_splash (0.0.1):
+    - Flutter
   - flutter_yookassa_sdk (0.0.1):
     - Flutter
     - YooKassaPayments
@@ -63,6 +65,7 @@ PODS:
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_yookassa_sdk (from `.symlinks/plugins/flutter_yookassa_sdk/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
   - google_maps_flutter (from `.symlinks/plugins/google_maps_flutter/ios`)
@@ -93,6 +96,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  flutter_native_splash:
+    :path: ".symlinks/plugins/flutter_native_splash/ios"
   flutter_yookassa_sdk:
     :path: ".symlinks/plugins/flutter_yookassa_sdk/ios"
   geolocator_apple:
@@ -120,6 +125,7 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   Flutter: 405776dd0763d7e32a8f989d4e271ca1317d080c
+  flutter_native_splash: 52501b97d1c0a5f898d687f1646226c1f93c56ef
   flutter_yookassa_sdk: 4d147a88fa4383dd0bd4bc3114fc7e398ef92705
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   FunctionalSwift: b65b0a7ddde7f11a11e794f79a1e8009724ed0bd

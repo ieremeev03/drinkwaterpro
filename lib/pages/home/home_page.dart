@@ -10,6 +10,7 @@ import 'bottom_navigation.dart';
 import 'tab_navigator.dart';
 import 'package:drinkwaterpro/data/globals.dart' as globals;
 import 'package:drinkwaterpro/models/user.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -47,6 +48,7 @@ class _HomePageState extends StateMVC {
        );
      }
     else {
+     FlutterNativeSplash.remove();
      final islogin = (state as LoginResultSuccess).userLogin;
       //print(islogin);
       if(islogin) {
