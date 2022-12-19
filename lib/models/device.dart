@@ -13,25 +13,37 @@ class  Device {
     this.id,
     this.deviceUuid,
     this.deviceAddress,
+    required this.deviceName,
     required this.latitude,
     required this.longitude,
     required this.price,
+    required this.range_str,
+    this.temp,
+    this.ppm,
   });
 
   int? id;
   String? deviceUuid;
   String? deviceAddress;
+  String deviceName;
   String latitude;
   String longitude;
+  String range_str;
   int? price;
+  int? temp;
+  int? ppm;
 
   factory Device.fromJson(Map<String, dynamic> json) => Device(
     id: json["id"],
     deviceUuid: json["deviceUuid"],
     deviceAddress: json["deviceAddress"],
+    deviceName: json["deviceName"],
     latitude: json["latitude"],
     longitude: json["longitude"],
+    range_str: json["range_str"],
     price: json["price"],
+    temp: json["temp"],
+    ppm: json["ppm"],
   );
 
 
@@ -39,9 +51,13 @@ class  Device {
     "id": id,
     "deviceUuid": deviceUuid,
     "deviceAddress": deviceAddress,
+    "deviceName": deviceName,
     "latitude": latitude,
     "longitude": longitude,
+    "range_str": range_str,
     "price": price,
+    "temp": temp,
+    "ppm": ppm,
   };
 
 
@@ -50,9 +66,13 @@ class  Device {
 // PostList являются оберткой для массива постов
 class DeviceList {
   final List<Device> devices = [];
+
   DeviceList.fromJson(List<dynamic> jsonItems) {
     for (var jsonItem in jsonItems) {
-      devices.add(Device.fromJson(jsonItem));
+      final d= Device.fromJson(jsonItem);
+      //print(d.id);
+
+      devices.add(d);
     }
   }
 }
@@ -62,6 +82,7 @@ class PlacemarkList {
   final List<Device> devices = [];
   PlacemarkList.fromPlacemark(List<dynamic> jsonItems) {
     for (var jsonItem in jsonItems) {
+
       devices.add(Device.fromJson(jsonItem));
     }
   }

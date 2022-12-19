@@ -12,6 +12,7 @@ import 'package:drinkwaterpro/pages/home/home_page.dart';
 import 'package:drinkwaterpro/pages/payment/add_pay.dart';
 import 'package:drinkwaterpro/pages/map/map.dart';
 import 'package:drinkwaterpro/data/database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 
 class SmsPage extends StatefulWidget {
@@ -30,6 +31,7 @@ class _SmsPageState extends StateMVC {
 
   void initState() {
     super.initState();
+
   }
 
   @override
@@ -49,7 +51,7 @@ class _SmsPageState extends StateMVC {
   String _sms_code = '';
 
   // _formState пригодится нам для валидации
-  final _formKey = GlobalKey<FormState>();
+ // final _smsKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +79,7 @@ class _SmsPageState extends StateMVC {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Pinput(
+            autofocus: true,
             defaultPinTheme: PinTheme(
                 width: 56,
                 height: 56,
@@ -107,8 +110,8 @@ class _SmsPageState extends StateMVC {
             _controller!.sendCode(globals.userPhone, pin, (status) {
               if (status is SendCodeSuccess) {
 
-                if(status.token['paymmentMethod'] > 0) {
-                  print('USERS: Методы есть');
+                if(status.token['new_user'] == 0) {
+                  print('USERS: существующий пользователь');
 
                   Future.delayed(const Duration(milliseconds: 1000), () {
 
@@ -122,7 +125,7 @@ class _SmsPageState extends StateMVC {
                   });
 
                 } else {
-                  print('USERS: Методы отсутствуют');
+                  print('USERS: новый пользователь');
                   Navigator.pushAndRemoveUntil(context,
                     MaterialPageRoute(
                       builder: (context) => AddPayPage(),
@@ -149,7 +152,7 @@ class _SmsPageState extends StateMVC {
 
 
           SizedBox(height: 30,),
-          Center(
+          /*Center(
             child: RichText(
                 text: TextSpan(
                   text: "Не пришёл код?",
@@ -159,17 +162,23 @@ class _SmsPageState extends StateMVC {
                   ],
                 )
             ),
-          ),
+          ),*/
+
           SizedBox(height: 60,),
 
 
 
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              shadowColor: Colors.transparent,
-              primary: Colors.transparent,
-              padding: const EdgeInsets.all(0.0),
-              elevation: 5,
+         /* ElevatedButton(
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                shadowColor: MaterialStateProperty.all(Colors.transparent),
+                fixedSize: MaterialStateProperty.all(const Size(270, 60)),
+                padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                    )
+                )
             ),
             onPressed: () {
 
@@ -203,7 +212,7 @@ class _SmsPageState extends StateMVC {
 
               ),
             ),
-          ),
+          ),*/
 
 
 

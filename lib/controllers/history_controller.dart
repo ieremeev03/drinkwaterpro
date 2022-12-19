@@ -14,14 +14,17 @@ class HistoryController extends ControllerMVC {
   HistoryResult currentState = HistoryResultLoading();
 
   void init() async {
+
     try {
       // получаем данные из репозитория
       final pouringList = await repo.fetchPourings();
+      repo.add_log('POURING: Получение списка наливов');
       // если все ок то обновляем состояние на успешное
       setState(() => currentState = HistoryResultSuccess(pouringList));
     } catch (error) {
       // в противном случае произошла ошибка
-      setState(() => currentState = HistoryResultFailure("Нет интернета"));
+      repo.add_log('POURING: Ошибка получения списка наливов');
+      setState(() => currentState = HistoryResultFailure("Вы не совершили ни одной покупки."));
     }
   }
 

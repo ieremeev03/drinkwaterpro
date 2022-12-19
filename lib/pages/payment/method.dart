@@ -1,5 +1,6 @@
 
 import 'package:drinkwaterpro/pages/pouring/pouring.dart';
+import 'package:drinkwaterpro/pages/pouring/step1.dart';
 import 'package:flutter/material.dart';
 import 'package:drinkwaterpro/controllers/payment_controller.dart';
 import 'package:drinkwaterpro/models/payment.dart';
@@ -14,8 +15,11 @@ import 'package:drinkwaterpro/data/globals.dart' as globals;
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:drinkwaterpro/data/repository.dart';
 
-class PaymentMethodPage extends StatefulWidget {
+import 'package:drinkwaterpro/pages/settings/settings.dart';
+import 'package:drinkwaterpro/pages/settings/usb.dart';
+import 'package:drinkwaterpro/pages/payment/edit_method.dart';
 
+class PaymentMethodPage extends StatefulWidget {
   @override
   _PaymentMethodPageState createState() => _PaymentMethodPageState();
 }
@@ -35,10 +39,11 @@ class _PaymentMethodPageState extends StateMVC {
   void initState() {
     super.initState();
     _controller?.init();
+    print('load');
   }
 
   // _formState пригодится нам для валидации
-  final _formKey = GlobalKey<FormState>();
+ // final _methodKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -60,12 +65,7 @@ class _PaymentMethodPageState extends StateMVC {
   Widget _buildContent() {
 
     String? selectedValue2;
-    List<String> items = [
-      'Item1',
-      'Item2',
-      'Item3',
-      'Item4',
-    ];
+
     // первым делом получаем текущее состояние
     final state = _controller?.currentState;
 
@@ -79,20 +79,30 @@ class _PaymentMethodPageState extends StateMVC {
       String? selectedValue;
       final methods = (state as GetPaymentMethodResultSuccess).methodList.methods;
         if (methods.length > 0) {
-          selectedValue = methods[0].uuidPayment.toString();
+          for (var method in methods) {
+              if(method.active == 1)  selectedValue = method.uuidPayment.toString();
+           }
+
         }
 
 
       return  Padding(
-        padding: const EdgeInsets.fromLTRB(20, 60, 20, 60),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Текущий',
-              style: kStyleLabelForm,
-              textAlign: TextAlign.left,
+            Row(
+              children: [
+                const Text(
+                  'Методы оплаты',
+                  style: kStyleLabelForm,
+                  textAlign: TextAlign.left,
+                ),
+                Spacer(),
+                changeMethod(methods)!,
+              ],
             ),
+
             SizedBox(height: 10),
             DropdownButtonFormField2(
               iconSize: 0,
@@ -164,6 +174,9 @@ class _PaymentMethodPageState extends StateMVC {
               onChanged: (value) {
                 selectedValue = value.toString();
                 globals.currentPaymentMethod = selectedValue;
+                if(value != "0") {
+                  _controller!.changePaymentMethod(selectedValue);
+                }
                 print(selectedValue);
               },
               onSaved: (value) {
@@ -173,8 +186,9 @@ class _PaymentMethodPageState extends StateMVC {
               },
             ),
 
-
             SizedBox(height: 25),
+
+
 
             TextButton(
               onPressed: () {
@@ -204,9 +218,6 @@ class _PaymentMethodPageState extends StateMVC {
               ),
             ),
 
-
-
-
             Divider(),
             SizedBox(height: 30,),
             Row(
@@ -222,20 +233,42 @@ class _PaymentMethodPageState extends StateMVC {
                     Text(globals.currentDevicePrice.toString() + " " +  num2word(globals.currentDevicePrice, ["рубль", "рубля","рублей"]), style: kStyle17SizeBlue,),
                   ],
                 ),
+
               ],
             ),
-            SizedBox(height: 30,),
+
+
+           /* SizedBox(height: 30,),
             Divider(),
+            Row(children: [
+              Column(children: [
+                Text("Температура воды:", style: kStyleTextDefault15),
+                Text(globals.currentDeviceTemp.toString(), style: kStyle16SizeBlue,)
+              ],),
+              Spacer(),
+              Column(children: [
+                Text("Качество воды:", style: kStyleTextDefault15),
+                Text(globals.currentDevicePpm.toString(), style: kStyle16SizeBlue,)
+              ],)
+
+            ],),*/
+            Spacer(),
+            getServiceButton(),
             Spacer(),
             Center(
                 child:
 
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shadowColor: Colors.transparent,
-                    primary: Colors.transparent,
-                    padding: const EdgeInsets.all(0.0),
-                    elevation: 5,
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                      shadowColor: MaterialStateProperty.all(Colors.transparent),
+                      fixedSize: MaterialStateProperty.all(const Size(200, 60)),
+                      padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                          )
+                      )
                   ),
                   onPressed: () {
                     globals.currentPaymentMethod = selectedValue;
@@ -243,7 +276,7 @@ class _PaymentMethodPageState extends StateMVC {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PouringPage(),
+                          builder: (context) => PouringStep1Page(),
                         ));
                   },
                   child: Ink(
@@ -280,6 +313,8 @@ class _PaymentMethodPageState extends StateMVC {
 
 
             ),
+
+            Spacer(),
           ],
         ),
 
@@ -319,5 +354,54 @@ class _PaymentMethodPageState extends StateMVC {
       default: return words[2];
     }
  }
+
+ Widget? changeMethod(methods) {
+    print(methods.length);
+    if (methods.length > 1) {
+      return TextButton(
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditPaymentMethodPage(),
+                ));
+          },
+          child: Text('Изменить', style: kStyle16SizeBlueUnderline,));
+    } else {
+      return Text('');
+    }
+ }
+
+  Widget getServiceButton(){
+    if(globals.service==1){
+      return Row(children: [
+        Spacer(),
+        IconButton(
+            iconSize: 60,
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsUsbPage(),
+                  ));
+            },
+            icon: FaIcon(FontAwesomeIcons.usb, size: 30.0, color: Colors.blue,)),
+        Spacer(),
+        IconButton(
+            iconSize: 60,
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsPage(),
+                  ));
+            },
+            icon: FaIcon(FontAwesomeIcons.screwdriverWrench, size: 30.0, color: Colors.blue,)),
+        Spacer(),
+      ],);
+    } else {
+      return SizedBox(height: 0,);
+    }
+  }
 
 }

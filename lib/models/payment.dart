@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:drinkwaterpro/data/globals.dart' as globals;
 
 
 Payment paymentFromJson(String str) => Payment.fromJson(json.decode(str));
@@ -65,6 +65,7 @@ class paymentMethodList {
   paymentMethodList.fromJson(List<dynamic> jsonItems) {
     print('???');
     for (var jsonItem in jsonItems) {
+      if(jsonItem['active'] == 1) {globals.currentPaymentMethod = jsonItem['uuidPayment'];}
       methods.add(Payment(
           id: jsonItem['id'],
           uuidPayment: jsonItem['uuidPayment'],
@@ -123,3 +124,4 @@ class GetPaymentMethodResultFailure extends GetPaymentMethodResult {
 class GetPaymentMethodLoading extends GetPaymentMethodResult {
   GetPaymentMethodLoading();
 }
+

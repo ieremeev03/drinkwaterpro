@@ -6,6 +6,7 @@ import 'package:mvc_pattern/mvc_pattern.dart';
 import '../../models/pouring.dart';
 import '../../controllers/history_controller.dart';
 import 'package:drinkwaterpro/pages/style.dart';
+import 'package:drinkwaterpro/pages/history/water-ani-4.dart';
 
 //final List<Pouring> Pourings = <Pouring>[Pouring("Мира 113", 5, 15, '21 марта 2022'), Pouring("Мира 113", 10, 30, '20 марта 2022'), Pouring("Ленина 66", 19, 53, '22 марта 2022'), Pouring("Мира 113", 10, 30, '20 марта 2022'), Pouring("Мира 113", 5, 15, '21 марта 2022'), Pouring("Мира 113", 10, 30, '20 марта 2022'), Pouring("Ленина 66", 19, 53, '22 марта 2022'), Pouring("Мира 113", 10, 30, '20 марта 2022') ];
 
@@ -33,6 +34,7 @@ class _HistoryListPageState extends StateMVC {
   void initState() {
     super.initState();
     _controller.init();
+    print('reload');
   }
 
   @override
@@ -44,10 +46,12 @@ class _HistoryListPageState extends StateMVC {
         title:  Text('История', style: kStyleTextPageTitle,),
       ),
       body: _buildContent(),
+      backgroundColor: Colors.white,
     );
   }
 
   Widget _buildContent() {
+   // _controller.init();
     // первым делом получаем текущее состояние
     final state = _controller.currentState;
 
@@ -58,12 +62,31 @@ class _HistoryListPageState extends StateMVC {
       );
     } else if (state is HistoryResultFailure) {
       // ошибка
-      return Center(
-        child: Text(
-            'Вы не совершили ни одной покупки',
-            textAlign: TextAlign.center,
-            style: kStyleLabelForm
-        ),
+      return RefreshIndicator(
+        color: Theme.of(context).primaryColor,
+        //Indicator Display Time Distance Top Position
+        displacement: 40,
+          child:  Column(
+
+            children: [
+              Spacer(),
+              Waterani4(width: 200, height: 200,),
+              Center(
+                child: Text(
+                    state.error,
+                    textAlign: TextAlign.center,
+                    style: kStyleLabelForm
+                ),
+              ),
+              Spacer(),
+            ],),
+        onRefresh: () async {
+          setState(() {
+            _controller.init();
+            final state = _controller.currentState;
+            //final history = _controller.;
+          });
+        },
       );
     } else {
       // отображаем список наливов
@@ -86,7 +109,9 @@ class _HistoryListPageState extends StateMVC {
           //Drop-down refresh callback
           onRefresh: () async {
             setState(() {
-
+                _controller.init();
+                final state = _controller.currentState;
+                //final history = _controller.;
             });
           },
         ),

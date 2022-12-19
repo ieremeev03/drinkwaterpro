@@ -21,6 +21,8 @@ class User {
     this.city,
     this.birthday,
     this.timezone,
+    this.srv,
+
   });
 
   int? id;
@@ -31,6 +33,7 @@ class User {
   String? city;
   String? birthday;
   String? timezone;
+  int? srv;
 
   factory User.fromJson(Map<String, dynamic> json) => User(
     id: json["id"],
@@ -41,6 +44,7 @@ class User {
     city: json["city"],
     birthday: json["birthday"],
     timezone: json["timezone"],
+    srv: json["srv"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -52,6 +56,8 @@ class User {
     "city": city,
     "birthday": birthday,
     "timezone": timezone,
+    "srv": srv,
+
   };
 
 
@@ -64,6 +70,8 @@ class User {
     city: json["city"],
     birthday: json["birthday"],
     timezone: json["timezone"],
+    srv: json["srv"],
+
   );
 
   Map<String, dynamic> toMap() => {
@@ -75,6 +83,8 @@ class User {
     "city": city,
     "birthday": birthday,
     "timezone": timezone,
+    "srv": srv,
+
   };
 }
 

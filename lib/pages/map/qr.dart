@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'dart:async';
 
 import 'package:drinkwaterpro/pages/profile/profile.dart';
 import 'package:flutter/foundation.dart';
@@ -13,6 +14,9 @@ import 'package:drinkwaterpro/models/device.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:drinkwaterpro/pages/map/code.dart';
 import 'package:drinkwaterpro/data/globals.dart' as globals;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:drinkwaterpro/data/repository.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class QrPage extends StatefulWidget {
   @override
@@ -21,6 +25,7 @@ class QrPage extends StatefulWidget {
 
 // не забываем расширяться от StateMVC
 class _QrPageState extends StateMVC {
+  final Repository repo = Repository();
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   Barcode? result;
   String code = '0000';
@@ -47,24 +52,52 @@ class _QrPageState extends StateMVC {
   @override
   void initState() {
     super.initState();
-    _controller.init();
+    _controller.init(context);
+    requestPermission();
+    repo.add_log('DEVICE: Сканирование QR кода');
+
+  }
+
+  Future<void> requestPermission() async {
+    final status = await Permission.camera.request();
+
+    setState(() {
+      print(status);
+    });
   }
 
   void _onQRViewCreated(QRViewController controllerQR) {
     this.controllerQR = controllerQR;
-    controllerQR.scannedDataStream.listen((scanData) {
-      setState(() {
+    controllerQR.scannedDataStream.listen((scanData)  async {
+
+     String deviceId = "";
+
+      setState(()  {
         result = scanData;
-        if (result != null) {
+        print(scanData);
+        if (result != null)  {
           code = result!.code!;
+          final splitted = code.split('=');
+          print(splitted[1]);
           controllerQR.dispose();
-          sendCode(code);
+          repo.add_log('DEVICE: Результат сканирования: ' + splitted[1]);
+          sendCode(splitted[1]);
+          deviceId = splitted[1];
         }
       });
+
+      await FirebaseAnalytics.instance.logEvent(
+        name: "scan_qr",
+        parameters: {
+          "device_id": deviceId,
+        },
+      );
+
     });
   }
 
   void sendCode(String code) {
+    print(code);
     _controller.getDevice(code,  (status) {
       if (status is DeviceInfoSuccess) {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentMethodPage()));
@@ -145,11 +178,16 @@ class _QrPageState extends StateMVC {
                     child:
 
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        shadowColor: Colors.transparent,
-                        primary: Colors.transparent,
-                        padding: const EdgeInsets.all(0.0),
-                        elevation: 5,
+                      style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                          shadowColor: MaterialStateProperty.all(Colors.transparent),
+                          fixedSize: MaterialStateProperty.all(const Size(250, 60)),
+                          padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                              )
+                          )
                       ),
                       onPressed: () {
 
@@ -159,48 +197,7 @@ class _QrPageState extends StateMVC {
                               builder: (context) => CodePage(),
                             ));
 
-                        // showDialog(
-                        //     context: context,
-                        //     builder: (BuildContext context) {
-                        //       return AlertDialog(
-                        //         actions: [
-                        //           TextButton(
-                        //             onPressed: () {
-                        //               Navigator.pop(context);
-                        //               sendCode(codeController.text);
-                        //
-                        //             },
-                        //             child: Text('Подтвердить'),),
-                        //           TextButton(
-                        //             onPressed: () {
-                        //               Navigator.pop(context);
-                        //
-                        //
-                        //             },
-                        //             child: Text('Отмена'),)
-                        //
-                        //         ],
-                        //         content: Container(
-                        //           height: 60,
-                        //           child: Column(
-                        //             children: [
-                        //
-                        //
-                        //
-                        //               TextField(
-                        //                 controller: codeController,
-                        //                 decoration: InputDecoration(
-                        //                   labelText: 'Введите номер аппарата',
-                        //                   border: OutlineInputBorder(
-                        //                     borderRadius:  const BorderRadius.all(const Radius.circular(15.0)),
-                        //                   ),
-                        //                 ),
-                        //               ),
-                        //             ],
-                        //           ),
-                        //         ),
-                        //       );
-                        //     }).then((value) => print(value));
+
                       },
                       child: Ink(
                         decoration: BoxDecoration(

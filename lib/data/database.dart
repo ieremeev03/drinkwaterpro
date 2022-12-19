@@ -12,10 +12,10 @@ class DatabaseHandler {
 
     String path = await getDatabasesPath();
     return openDatabase(
-      join(path, 'drinkwater.db'),
+      join(path, 'drinkwater_r.db'),
       onCreate: (database, version) async {
         await database.execute(
-          "CREATE TABLE users(id INTEGER, first_name TEXT NOT NULL, last_name TEXT NOT NULL, birthday DATE, city TEXT ,email TEXT, phone TEXT, timezone TEXT)",
+          "CREATE TABLE users(id INTEGER, first_name TEXT NOT NULL, last_name TEXT NOT NULL, birthday DATE, city TEXT, email TEXT, phone TEXT, timezone TEXT, srv INTEGER)",
         );
         await database.execute(
           "CREATE TABLE settings(name TEXT NOT NULL, value TEXT NOT NULL)",
@@ -31,7 +31,7 @@ class DatabaseHandler {
 
     result = await db.insert('users', user.toMap());
     print('USER: Добавили пользователя в хранилище');
-
+    globals.service = user.srv!;
     return result;
   }
 
@@ -44,20 +44,25 @@ class DatabaseHandler {
       where: "id > 0",
     );
     print('USER: Удалили всех пользователей из хранилища');
+    globals.isLoggedIn = false;
     return result;
   }
 
   Future<User> userInfo() async {
     bool result;
     User user = User();
+    globals.isLoggedIn = false;
     final Database db = await initializeDB();
     List<Map> query = await db.query(
       'users',
       where: "id > 0",
     );
-    query.forEach((row) => user = User.fromMap(row));
+    query.forEach((row) {
+      user = User.fromMap(row);
+    });
     print("USER: достали из базы пользователя "+ user.email.toString());
     globals.userId = int.parse(user.id.toString());
+    globals.service = user.srv!;
     return user;
   }
 
@@ -70,6 +75,8 @@ class DatabaseHandler {
         where: "id > 0",
         );
     result = query.length>0? globals.isLoggedIn =  true : globals.isLoggedIn = false;
+    //globals.isLoggedIn = true;
+    //result = globals.isLoggedIn;
     print('AUTH: Результат проверки: '+result.toString());
     return result;
   }

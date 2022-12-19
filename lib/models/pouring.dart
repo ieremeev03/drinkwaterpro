@@ -120,3 +120,8 @@ class LastPouringFailure extends LastPouring {
   final String error;
   LastPouringFailure(this.error);
 }
+
+// загрузка данных
+class LastPouringLoading extends LastPouring {
+  LastPouringLoading();
+}

@@ -41,7 +41,7 @@ class _AddPayPageState extends StateMVC {
   String _phonecompleteNumber = '';
 
   // _formState пригодится нам для валидации
-  final _formKey = GlobalKey<FormState>();
+  //final _addKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -76,9 +76,8 @@ class _AddPayPageState extends StateMVC {
                   text: "Сразу платить не надо, мы",
                   style: kStyleTextDefault15,
                   children: <TextSpan>[
-                    TextSpan(text: " подарим вам 100 рублей ", style: kStyleInputTextSecond),
+                    TextSpan(text: " подарим вам "+globals.bonus.toString()+" рублей ", style: kStyleInputTextSecond),
                     TextSpan(text: " и вы сможете налить воду бесплатно "),
-
                   ],
                 )
             ),
@@ -86,38 +85,75 @@ class _AddPayPageState extends StateMVC {
 
           Spacer(),
 
-          Directionality(
-            textDirection: TextDirection.rtl,
-            child: ElevatedButton.icon(
-              icon: FaIcon(FontAwesomeIcons.angleRight,size: 15.0, color: Colors.white,),
-              style: flatButtonStyle,
-              onPressed: () {
+          ElevatedButton(
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                shadowColor: MaterialStateProperty.all(Colors.transparent),
+                fixedSize: MaterialStateProperty.all(const Size(250, 60)),
+                padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                    )
+                )
+            ),
+            onPressed: () {
 
-                _controller!.addPaymentMethod( (status) {
-                  if (status is CheckoutSuccess) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Платеж создан"))
-                    );
+              _controller!.addPaymentMethod( (status) {
+                if (status is CheckoutSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Платеж создан"))
+                  );
 
 
-                    setState(() {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HomePage(),
-                        ), (Route<dynamic> route) => false,);
-                    });
+                  setState(() {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HomePage(),
+                      ), (Route<dynamic> route) => false,);
+                  });
 
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Ошибка добавления метода оплаты"))
-                    );
-                  }
-                });
-              },
-              label:  Text('Привязать карту'),
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Ошибка добавления метода оплаты"))
+                  );
+                }
+              });
+            },
+            child: Ink(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(18.0)) ,
+                gradient: LinearGradient(colors: [
+                  Color.fromRGBO(68, 191, 254, 1),
+                  Color.fromRGBO(25, 159, 227, 1),
+                ]),
+              ),
+              child: Container(
+                  width: 250,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(18.0)) ,
+                  ) ,
+                  padding: const EdgeInsets.all(15),
+                  constraints: const BoxConstraints(minWidth: 88.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Привязать карту', textAlign: TextAlign.center, style: kStyleButtonTextNew,),
+                      SizedBox(
+                        width: 7,
+                      ),
+                      FaIcon(FontAwesomeIcons.angleRight,size: 15.0, color: Colors.white,),
+                    ],)
+
+
+
+              ),
             ),
           ),
+
+
 
           Spacer(),
           TextButton(

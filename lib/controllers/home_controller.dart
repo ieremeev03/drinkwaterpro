@@ -78,6 +78,7 @@ class HomeController extends ControllerMVC {
   // предоставляет нам возможность иметь состояние в контроллере,
   // что очень удобно
   void selectTab(TabItem tabItem) {
+
     setState(() => _currentTab = tabItem);
   }
 

@@ -37,8 +37,10 @@ class LoginController extends ControllerMVC {
       // сервер вернул результат
       callback(SignInSuccess());
       globals.userPhone = phone;
+
     } catch (error) {
       // произошла ошибка
+
       callback(SignInFailure());
     }
   }
@@ -46,6 +48,8 @@ class LoginController extends ControllerMVC {
   void sendCode(String phone, String code, void Function(SendCode) callback) async {
     try {
       print('USER: Отправка смс кода');
+      repo.add_log("USER: Отправка смс кода");
+
       final result = await repo.sendCode(phone, code);
       print('result');
       print(result);
@@ -55,6 +59,7 @@ class LoginController extends ControllerMVC {
       callback(SendCodeSuccess(result));
     } catch (error) {
       // произошла ошибка
+      repo.add_log("USER: Ошибка отправки смс кода");
       callback(SendCodeFailure('Ошибка отправки'));
     }
   }
@@ -62,11 +67,15 @@ class LoginController extends ControllerMVC {
   void getUserInfo (String token) async {
     try {
       final result = await repo.getUser(token);
+      repo.add_log('USER: Получение информации о пользователе');
       loginUser(result);
     } catch (error) {
+      repo.add_log('USER: Ошибка получения информации о пользователе');
       print(error);
     }
   }
+
+
 
   void loginUser(User user) async {
    globals.userId = int.parse(user.id.toString());

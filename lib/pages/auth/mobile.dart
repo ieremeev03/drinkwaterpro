@@ -9,8 +9,11 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:drinkwaterpro/pages/auth/sms.dart';
+import 'package:drinkwaterpro/pages/auth/police.dart';
 import 'package:drinkwaterpro/data/globals.dart' as globals;
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+import 'package:flutter/gestures.dart';
+import 'package:drinkwaterpro/data/repository.dart';
 
 class LoginPage extends StatefulWidget {
 
@@ -23,6 +26,7 @@ class _LoginPageState extends StateMVC {
 
   // _controller может быть null
   LoginController? _controller;
+  final Repository repo = new Repository();
 
   // получаем PostController
   _LoginPageState() : super(LoginController()) {
@@ -34,7 +38,7 @@ class _LoginPageState extends StateMVC {
   String _phonecompleteNumber = '';
 
   // _formState пригодится нам для валидации
-  final _formKey = GlobalKey<FormState>();
+  final _mobileKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +68,7 @@ class _LoginPageState extends StateMVC {
      child: Column(
        children: [
          Form(
-           key: _formKey,
+           key: _mobileKey,
            child: Column(
              crossAxisAlignment: CrossAxisAlignment.start,
              children: [
@@ -115,7 +119,7 @@ class _LoginPageState extends StateMVC {
                    initialCountryCode: 'RU',
                    onChanged: (phone) {
                      _phonecompleteNumber = phone.completeNumber;
-                     print(phone.completeNumber);
+                    // print(phone.completeNumber);
                    },
                  )
                  ,),
@@ -127,19 +131,25 @@ class _LoginPageState extends StateMVC {
          Spacer(),
 
          ElevatedButton(
-           style: ElevatedButton.styleFrom(
-             shadowColor: Colors.transparent,
-             primary: Colors.transparent,
-             padding: const EdgeInsets.all(0.0),
-             elevation: 5,
+           style: ButtonStyle(
+               backgroundColor: MaterialStateProperty.all(Colors.transparent),
+               shadowColor: MaterialStateProperty.all(Colors.transparent),
+               fixedSize: MaterialStateProperty.all(const Size(180, 60)),
+               padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                   RoundedRectangleBorder(
+                     borderRadius: BorderRadius.circular(18.0),
+                   )
+               )
            ),
            onPressed: () {
              // сначала запускаем валидацию формы
-             if (_formKey.currentState!.validate()) {
+             if (_mobileKey.currentState!.validate()) {
                // запрос на существование пользователя
                // получаем текст через TextEditingController
                final phone = _phonecompleteNumber;
                print('Форма: '+ _phonecompleteNumber);
+               repo.add_log("Ввод номера телефона " + _phonecompleteNumber);
 
                _controller!.sendSMS(phone, (status) {
                  if (status is SignInSuccess) {
@@ -196,18 +206,28 @@ class _LoginPageState extends StateMVC {
 
 
          Center(
-           child: RichText(
-               textAlign: TextAlign.center,
-               text: TextSpan(
-                 text: "*  Нажимая «Продолжить» вы соглашаетесь c",
-                 style: kStyleTextDefault15,
-                 children: <TextSpan>[
-                   TextSpan(text: " политикой конфиденциальности ", style: kStyleInputTextSecond),
+           child: GestureDetector(
+             onTap: () {
+               Navigator.push(
+                   context,
+                   MaterialPageRoute(
+                     builder: (context) => PolicePage(),
+                   ));
+             },
+             child: RichText(
+                 textAlign: TextAlign.center,
+                 text: TextSpan(
+                   text: "*  Нажимая «Продолжить» вы соглашаетесь c",
+                   style: kStyleTextDefault15,
+                   children: <TextSpan>[
 
-
-                 ],
-               )
-           ),
+                     TextSpan(
+                       text: " политикой конфиденциальности ",
+                       style: kStyleInputTextSecond,
+                     ),
+                   ],
+                 )
+             ),)
          ),
        ],
      ),

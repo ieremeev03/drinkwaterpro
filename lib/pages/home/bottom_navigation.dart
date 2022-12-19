@@ -26,9 +26,10 @@ class MyBottomNavigation extends StatelessWidget {
     // Используем встроенный виджет BottomNavigationBar для
     // реализации нижнего меню
     return BottomNavigationBar(
+      iconSize: 30,
         selectedItemColor: _colorTabMatching(currentTab),
-        selectedFontSize: 11,
-        unselectedItemColor: Colors.grey,
+        selectedFontSize: 12,
+        unselectedItemColor: Color.fromRGBO(163, 195, 210, 1),
         type: BottomNavigationBarType.fixed,
         currentIndex: currentTab!.index,
         // пункты меню
@@ -64,7 +65,7 @@ class MyBottomNavigation extends StatelessWidget {
 
   // получаем цвет элемента
   Color? _colorTabMatching(TabItem? item) {
-    return currentTab == item ? tabs[item!]!.color : Colors.grey;
+    return currentTab == item ? tabs[item!]!.color : Color.fromRGBO(163, 195, 210, 1);
   }
 
 }

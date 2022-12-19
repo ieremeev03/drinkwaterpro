@@ -81,6 +81,10 @@ class HistoryListItem extends StatelessWidget {
         return FaIcon(FontAwesomeIcons.wallet,size: 20.0, color: kTextDefaultColor,);
         break;
 
+      case null:
+        return FaIcon(FontAwesomeIcons.exclamationCircle,size: 20.0, color: kTextRedColor,);
+        break;
+
       default:
         return FaIcon(FontAwesomeIcons.creditCard,size: 20.0, color: kTextDefaultColor,);
     }
