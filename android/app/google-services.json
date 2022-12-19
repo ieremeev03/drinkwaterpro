@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "888286699567",
+    "project_id": "drinkwater-345609",
+    "storage_bucket": "drinkwater-345609.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:888286699567:android:18a6569117c2d2a5a126da",
+        "android_client_info": {
+          "package_name": "pro.enaza.drinkwater"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "888286699567-vnpkusb14bpgi4ai6cj6hjtnej9n0ib6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqp87Gtryj4cZ7UZ3VKaNiZ_ye3nIm5Kw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "888286699567-vnpkusb14bpgi4ai6cj6hjtnej9n0ib6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "888286699567-0mj3por7511h7r4pkk46a5dp8ptpgpdn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "pro.enaza.drinkwater",
+                "app_store_id": "1627990072"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
