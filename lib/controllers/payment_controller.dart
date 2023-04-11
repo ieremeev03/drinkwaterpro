@@ -5,6 +5,7 @@ import '../models/payment.dart';
 import 'package:mvc_pattern/mvc_pattern.dart';
 import 'package:drinkwaterpro/data/globals.dart' as globals;
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:yookassa_payments_flutter/yookassa_payments_flutter.dart';
 
 class PaymentController extends ControllerMVC {
   // создаем наш репозиторий
@@ -42,17 +43,27 @@ class PaymentController extends ControllerMVC {
       final token_api = await handler.getParam('api_token');
       final user = await  handler.userInfo();
       final token_ya = await repo.checkout(user.phone);
-      final pay = await repo.auth(token_ya,1,'Авторизация карты');
-      final info = await repo.info(pay['id']);
-      repo.add_log('PAYMENT: статус платежа за авторизацию: '+info['status']);
+      if (token_ya is SuccessTokenizationResult) {
+        print('YOOMONEY CHECKOUT: '+token_ya.token);
 
-      if (info['status']=='succeeded') {
-        add_method = await repo.addPaymentMethod(pay, token_api);
-        callback(CheckoutSuccess(add_method));
-      } else {
+        final pay = await repo.auth(token_ya.token,1,'Авторизация карты', token_ya.paymentMethodType);
+        final info = await repo.info(pay['id']);
+        repo.add_log('PAYMENT: статус платежа за авторизацию: '+info['status']);
 
+        if (info['status']=='succeeded') {
+          add_method = await repo.addPaymentMethod(pay, token_api);
+          callback(CheckoutSuccess(add_method));
+        } else {
+
+          callback(CheckoutFailure());
+        }
+
+      } else if (token_ya is ErrorTokenizationResult) {
         callback(CheckoutFailure());
       }
+
+
+
       // сервер вернул результат
 
     } catch (error) {

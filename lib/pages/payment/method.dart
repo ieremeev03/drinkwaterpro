@@ -273,11 +273,28 @@ class _PaymentMethodPageState extends StateMVC {
                   onPressed: () {
                     globals.currentPaymentMethod = selectedValue;
                     print(selectedValue);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PouringStep1Page(),
-                        ));
+                    if (globals.blockPouring) {
+                       showDialog(
+                        context: context,
+                        builder: (BuildContext context) => AlertDialog(
+                          title: const Text('У вас имеются неоплаченные наливы'),
+                          content: const Text('Пополните баланс привязанной карты или добавьте другую карту для оплаты'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, 'Ok'),
+                              child: const Text('Закрыть'),
+                            ),
+
+                          ],
+                        ),);
+                    } else {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PouringStep1Page(),
+                          ));
+                    }
+
                   },
                   child: Ink(
                     decoration: BoxDecoration(

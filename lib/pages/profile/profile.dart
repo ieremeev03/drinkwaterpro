@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:drinkwaterpro/pages/payment/edit_method.dart';
 import 'package:drinkwaterpro/controllers/payment_controller.dart';
 import 'package:drinkwaterpro/pages/splash.dart';
+import 'package:drinkwaterpro/pages/profile/about.dart';
 
 
 
@@ -104,10 +105,15 @@ class _ProfilePageState extends StateMVC {
         actions: [
           PopupMenuButton(
             // add icon, by default "3 dot" icon
-             icon: Icon(Icons.exit_to_app),
+             icon: Icon(Icons.more_horiz),
               position: PopupMenuPosition.under,
               itemBuilder: (context){
                 return [
+                  PopupMenuItem<int>(
+                    value: 0,
+                    child: Text("О приложении", style: kStyleTextDefault,),
+                  ),
+
                   PopupMenuItem<int>(
                     value: 0,
                     child: Text("Выйти", style: kStyleTextDefault,),
@@ -121,14 +127,21 @@ class _ProfilePageState extends StateMVC {
               },
               onSelected:(value){
                 if(value == 0){
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AboutPage(),
+                      ));
+
+                }else if(value == 1){
                   globals.isLoggedIn = false;
                   _controller.logout();
 
                   Navigator.of(context, rootNavigator: true).pushReplacement(
                     MaterialPageRoute(builder: (context) => LoginPage()),
                   );
-
-                }else if(value == 1){
+                }
+                else if(value == 2){
                   _dialogBuilder(context);
                 }
               }
@@ -173,79 +186,62 @@ class _ProfilePageState extends StateMVC {
       emailController.text = user.email.toString();
       cityController.text = user.city.toString();
 
-      return SingleChildScrollView(child:
-          Stack(children: [
-            Container(
-                padding: const EdgeInsets.fromLTRB(20,40,20,20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
-                    TextFormField(
-                      controller: nameController,
-                      decoration: kStyleFormNoBorderName,
-                      style: kStyleTextDefault15,
-                    ),
-                    SizedBox(height: 5,),
-                    Divider(),
-                    SizedBox(height: 10,),
-                    TextFormField(
-                      controller: cityController,
-                      decoration: kStyleFormNoBorderCity,
-                      style: kStyleTextDefault15,
-
-                    ),
-                    SizedBox(height: 5,),
-                    Divider(),
-                    SizedBox(height: 10,),
-                    TextFormField(
-                      controller: emailController,
-                      decoration: kStyleFormNoBorderEmail,
-                      style: kStyleTextDefault15,
-
-                    ),
-                    SizedBox(height: 5,),
-                    Divider(),
-                    SizedBox(height: 10,),
-                    TextFormField(
-                      enabled: false,
-                      controller: phoneController,
-                      decoration: kStyleFormNoBorderPhone,
-                      style: kStyleTextDefault15,
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: [
-                        PhoneInputFormatter()
-                      ],
-                    ),
-                    SizedBox(height: 5,),
-                    Divider(),
-                    SizedBox(height: 10,),
-                    Text('Мeтод оплаты',  style:  TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    )),
-                    SizedBox(height: 5,),
-                    paymentMethod(),
-
-
-
-
-
-
-                  ],
-                )
-            ),
-            Container(
-              height: MediaQuery.of(context).size.height-180,
-              child:
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end,
+      return SingleChildScrollView(
+        child:  Container(
+            padding: const EdgeInsets.fromLTRB(20,40,20,20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
 
+                TextFormField(
+                  controller: nameController,
+                  decoration: kStyleFormNoBorderName,
+                  style: kStyleTextDefault15,
+                ),
+                SizedBox(height: 5,),
+                Divider(),
+                SizedBox(height: 10,),
+                TextFormField(
+                  controller: cityController,
+                  decoration: kStyleFormNoBorderCity,
+                  style: kStyleTextDefault15,
+
+                ),
+                SizedBox(height: 5,),
+                Divider(),
+                SizedBox(height: 10,),
+                TextFormField(
+                  controller: emailController,
+                  decoration: kStyleFormNoBorderEmail,
+                  style: kStyleTextDefault15,
+
+                ),
+                SizedBox(height: 5,),
+                Divider(),
+                SizedBox(height: 10,),
+                TextFormField(
+                  enabled: false,
+                  controller: phoneController,
+                  decoration: kStyleFormNoBorderPhone,
+                  style: kStyleTextDefault15,
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [
+                    PhoneInputFormatter()
+                  ],
+                ),
+                SizedBox(height: 5,),
+                Divider(),
+                SizedBox(height: 10,),
+                Text('Мeтод оплаты',  style:  TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                )),
+                SizedBox(height: 5,),
+                paymentMethod(),
+                SizedBox(height: 15,),
                 Center(
                   child:
-
                   ElevatedButton(
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(Colors.transparent),
@@ -316,29 +312,39 @@ class _ProfilePageState extends StateMVC {
                   ),
                 ),
 
-                TextButton(
-                    onPressed: () {
-                      final Uri _emailLaunchUri = Uri(
-                        scheme: 'mailto',
-                        path: 'support@drinkwater.pro',
-                        queryParameters: {'subject': "Вопрос по приложению", 'body': ""},
-                      );
+                Center(child:
+                Column(children: [
 
-                      final String _emailUriString = _emailLaunchUri
-                          .toString()
-                          .replaceAll('+', '\%20');
+                  TextButton(
+                      onPressed: () {
+                        final Uri _emailLaunchUri = Uri(
+                          scheme: 'mailto',
+                          path: 'support@drinkwater.pro',
+                          queryParameters: {'subject': "Вопрос по приложению", 'body': ""},
+                        );
 
-                      launch(_emailUriString.toString());
-                    },
-                    child: Text('support@drinkwater.pro')
-                ),
-                Container(
-                  height: 15,
-                )
-              ],),)
+                        final String _emailUriString = _emailLaunchUri
+                            .toString()
+                            .replaceAll('+', '\%20');
 
-          ],)
-     );
+                        launch(_emailUriString.toString());
+                      },
+                      child: Text('support@drinkwater.pro')
+                  ),
+                ],),),
+
+
+
+
+
+
+
+
+              ],
+            )
+        ),
+      );
+
     }
   }
 

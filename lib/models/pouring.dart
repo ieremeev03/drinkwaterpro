@@ -2,6 +2,7 @@
 // сначала создаем объект самого поста
 import 'dart:convert';
 import 'dart:developer';
+import 'package:drinkwaterpro/data/globals.dart' as globals;
 
 class Pouring {
   // все поля являются private
@@ -14,6 +15,7 @@ class Pouring {
   final String? _card_type;
   final String? _last4;
   final DateTime? _date;
+  final int? _payment;
 
 
   // создаем getters для наших полей
@@ -26,9 +28,10 @@ class Pouring {
   String? get card_type => _card_type;
   String? get last4 => _last4;
   DateTime? get date => _date;
+  int? get payment => _payment;
 
   // добавим новый конструктор для поста
-  Pouring(this._id, this._address, this._liters, this._summ, this._cashless,this._card_type,this._last4, this._date);
+  Pouring(this._id, this._address, this._liters, this._summ, this._cashless,this._card_type,this._last4, this._date, this._payment);
 
 
   // toJson() превращает Post в строку JSON
@@ -41,6 +44,7 @@ class Pouring {
       "card_type": _card_type,
       "last4": _last4,
       "date": _date,
+      "payment": _payment,
 
     });
   }
@@ -58,7 +62,8 @@ class Pouring {
         this._cashless = json["cashless"],
         this._card_type = json["card_type"],
         this._last4 = json["last4"],
-        this._date = json["date"];
+        this._date = json["date"],
+        this._payment = json["payment"];
 
 }
 
@@ -68,6 +73,12 @@ class PouringList {
 
   PouringList.fromJson(List<dynamic> jsonItems) {
      for (var jsonItem in jsonItems) {
+
+       if (jsonItem['payment'] == 0) {
+         globals.blockPouring = true;
+         print(jsonItem['payment']);
+       }
+
        pourings.add(Pouring(
          jsonItem['id'],
          jsonItem['address'],
@@ -77,6 +88,7 @@ class PouringList {
          jsonItem['card_type'],
          jsonItem['last4'],
          DateTime.parse(jsonItem['date']),
+         jsonItem['payment'],
        ));
 
       }

@@ -60,16 +60,19 @@ class _HomePageState extends StateMVC {
       _asyncMethod();
     });
 
+    print(globals.androidVersion);
+
 
 
   }
 
   _asyncMethod() async {
+
     FirebaseMessaging.instance.getToken().then((value) {
       repo.add_log("Message token is:", data: value.toString());
       print("Message token is: $value");
       globals.fmcToken = value.toString();
-      repo.getSettings();
+
     }, onError: (err) {
       repo.add_log("getToken onError is: ");
       print("getToken onError is: $err");

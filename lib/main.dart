@@ -14,6 +14,7 @@ import 'package:drinkwaterpro/data/globals.dart' as globals;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:drinkwaterpro/controllers/home_controller.dart';
 import 'package:drinkwaterpro/data/database.dart';
+import 'package:appmetrica_plugin/appmetrica_plugin.dart';
 
 
 void main() async {
@@ -23,6 +24,7 @@ void main() async {
   //FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   WidgetsFlutterBinding.ensureInitialized();
 
+  AppMetrica.activate(AppMetricaConfig("b8d659d6-934e-4ef6-a375-d5b6ad9c507e"));
 
   final userLogin = await handler.isLoginUser();
 
@@ -100,6 +102,7 @@ void main() async {
   });
 
   repo.add_log('start' );
+  await analytics.logAppOpen();
 
   runApp(const MyApp());
 }

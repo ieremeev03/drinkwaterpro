@@ -18,6 +18,7 @@ class  Device {
     required this.longitude,
     required this.price,
     required this.range_str,
+    this.online_payment,
     this.temp,
     this.ppm,
   });
@@ -29,6 +30,7 @@ class  Device {
   String latitude;
   String longitude;
   String range_str;
+  int? online_payment;
   int? price;
   int? temp;
   int? ppm;
@@ -42,6 +44,7 @@ class  Device {
     longitude: json["longitude"],
     range_str: json["range_str"],
     price: json["price"],
+    online_payment: json["online_payment"],
     temp: json["temp"],
     ppm: json["ppm"],
   );
@@ -56,6 +59,7 @@ class  Device {
     "longitude": longitude,
     "range_str": range_str,
     "price": price,
+    "online_payment": online_payment,
     "temp": temp,
     "ppm": ppm,
   };
@@ -82,7 +86,6 @@ class PlacemarkList {
   final List<Device> devices = [];
   PlacemarkList.fromPlacemark(List<dynamic> jsonItems) {
     for (var jsonItem in jsonItems) {
-
       devices.add(Device.fromJson(jsonItem));
     }
   }

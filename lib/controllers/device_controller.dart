@@ -1,10 +1,12 @@
 
 import 'dart:convert';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'dart:async';
+import 'dart:io';
 import '../data/repository.dart';
 import '../models/device.dart';
 import 'package:mvc_pattern/mvc_pattern.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:drinkwaterpro/data/database.dart';
 import 'package:drinkwaterpro/data/globals.dart' as globals;
@@ -16,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:drinkwaterpro/pages/home/block.dart';
+import 'package:drinkwaterpro/pages/home/update.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class DeviceController extends ControllerMVC {
@@ -32,6 +35,10 @@ class DeviceController extends ControllerMVC {
     try {
       // получаем данные из репозитория
       final center = currentPosition().then((value) async {
+        PackageInfo packageInfo = await PackageInfo.fromPlatform();
+        String version = packageInfo.version;
+        String buildNumber = packageInfo.buildNumber;
+        await repo.getSettings();
         repo.add_log('DEVICE: Получение списка устройств');
         final deviceList = await repo.fetchDevices();
         // если все ок то обновляем состояние на успешное
@@ -46,11 +53,31 @@ class DeviceController extends ControllerMVC {
 
           }
 
+          if (Platform.isAndroid && globals.androidVersion != buildNumber) {
+            print('Invalid Version: ' + buildNumber + ' !=' + globals.androidVersion);
+            repo.add_log('Invalid Version: ' + buildNumber + ' !=' + globals.androidVersion);
+
+            Navigator.of(context, rootNavigator: true).pushReplacement(
+              MaterialPageRoute(builder: (context) => UpdatePage()),
+            );
+
+          }
+
+          if (Platform.isIOS && globals.iosVersion != version) {
+            repo.add_log('Invalid Version: ' + version + ' !=' + globals.iosVersion);
+            print('Invalid Version: ' + version + ' !=' + globals.iosVersion);
+
+            Navigator.of(context, rootNavigator: true).pushReplacement(
+              MaterialPageRoute(builder: (context) => UpdatePage()),
+            );
+          }
+
 
 
         } else {
           setState(() => currentState = DeviceResultFailure('Поблизости нет аппаратов с чистой водой'));
         }
+
       });
 
 

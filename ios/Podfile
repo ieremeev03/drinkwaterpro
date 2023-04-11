@@ -30,10 +30,12 @@ flutter_ios_podfile_setup
 source 'https://github.com/CocoaPods/Specs.git'
 source 'https://git.yoomoney.ru/scm/sdk/cocoa-pod-specs.git'
 
+
+
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
-  pod 'YooKassaPayments', :git => 'https://git.yoomoney.ru/scm/sdk/yookassa-payments-swift.git', :tag => '6.8.0'
+
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end

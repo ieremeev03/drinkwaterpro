@@ -28,3 +28,8 @@ int bonus = 0;
 int waitPouring = 5;
 int blockApp = 0;
 String blockMessage = "Неизвестная ошибка";
+String iosVersion = "0";
+String androidVersion = "0";
+String updateMessage = "";
+
+bool blockPouring = false;

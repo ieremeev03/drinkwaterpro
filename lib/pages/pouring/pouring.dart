@@ -199,7 +199,9 @@ class _PouringPageState extends StateMVC with TickerProviderStateMixin  {
           onTap: (){
             print('final');
             disconnect_Mqtt();
+            _controller.lockDevice(globals.currentDeviceId);
             //pouring = true;
+
             setState((){  });
             Navigator.pushAndRemoveUntil(
                 context,

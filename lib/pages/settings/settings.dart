@@ -20,10 +20,12 @@ class _SettingsPageState extends State<SettingsPage>{
   final client = MqttServerClient('lk.drinkwater.pro', globals.userPhone);
   var pongCount = 0; // Pong counter
   final confTopic = globals.currentDeviceUuid+'/config';
+  final thermoTopic = globals.currentDeviceUuid+'/config_thermo';
+  final flushTopic = globals.currentDeviceUuid+'/config_flush';
   final cmdTopic = globals.currentDeviceUuid+'/cmd';
   final statusTopic = globals.currentDeviceUuid+'/status';
   final sensorTopic = globals.currentDeviceUuid+'/sensors';
-  var params;
+  var main,thermo,flush;
   var statuses;
   var sensors;
 
@@ -103,6 +105,64 @@ class _SettingsPageState extends State<SettingsPage>{
                       icon: FaIcon(FontAwesomeIcons.coins, size: 30.0, color: Colors.blue,))
                 ],),
                 Row(children: [
+                  Text("Заблокирвоать аппарат", style: kStyleInputProfileBold,),
+                  Spacer(),
+                  IconButton(
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (BuildContext context) => AlertDialog(
+                          title: const Text('Заблокирвоать аппарат'),
+                          content: const Text('Вы уверены?'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, 'Cancel'),
+                              child: const Text('Отмена'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                final builder = MqttClientPayloadBuilder();
+                                builder.addString('lock!');
+                                client.publishMessage(cmdTopic, MqttQos.atLeastOnce, builder.payload!);
+
+                                Navigator.pop(context, 'Ok');
+
+                              },
+                              child: const Text('Да'),
+                            ),
+                          ],
+                        ),),
+                      icon: FaIcon(FontAwesomeIcons.lock, size: 30.0, color: Colors.blue,))
+                ],),
+                Row(children: [
+                  Text("Разблокирвоать аппарат", style: kStyleInputProfileBold,),
+                  Spacer(),
+                  IconButton(
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (BuildContext context) => AlertDialog(
+                          title: const Text('Разблокирвоать аппарат'),
+                          content: const Text('Вы уверены?'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, 'Cancel'),
+                              child: const Text('Отмена'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                final builder = MqttClientPayloadBuilder();
+                                builder.addString('unlock!');
+                                client.publishMessage(cmdTopic, MqttQos.atLeastOnce, builder.payload!);
+
+                                Navigator.pop(context, 'Ok');
+
+                              },
+                              child: const Text('Да'),
+                            ),
+                          ],
+                        ),),
+                      icon: FaIcon(FontAwesomeIcons.lockOpen, size: 30.0, color: Colors.blue,))
+                ],),
+                Row(children: [
                   Text("Перезагрузка", style: kStyleInputProfileBold,),
                   Spacer(),
                   IconButton(
@@ -131,13 +191,33 @@ class _SettingsPageState extends State<SettingsPage>{
                         ),),
                       icon: FaIcon(FontAwesomeIcons.rotateLeft, size: 30.0, color: Colors.blue,))
                 ],),
+                Row(children: [
+                  Text("Обновление", style: kStyleInputProfileBold,),
+                  Spacer(),
+                  IconButton(
+                      onPressed: () => null ,
+                      icon: FaIcon(FontAwesomeIcons.cloud, size: 30.0, color: Colors.blue,))
+                ],),
                 SizedBox(height: 15,),
 
-                Text('Параметры', style: kStyleTextDefault16),
+                Text('Основные параметры', style: kStyleTextDefault16),
                 SizedBox(height: 7,),
                 Center(
-                  child: buildParams(),
+                  child: buildParams(main),
                 ),
+                SizedBox(height: 7,),
+                Text('Параметры очистки', style: kStyleTextDefault16),
+                SizedBox(height: 7,),
+                Center(
+                  child: buildParams(flush),
+                ),
+                SizedBox(height: 7,),
+                Text('Параметры термостата', style: kStyleTextDefault16),
+                SizedBox(height: 7,),
+                Center(
+                  child: buildParams(thermo),
+                ),
+
                 SizedBox(height: 60,),
                 ElevatedButton(
                   style: ButtonStyle(
@@ -152,11 +232,20 @@ class _SettingsPageState extends State<SettingsPage>{
                       )
                   ),
                   onPressed: () async {
-                    print(params);
+
 
                     final builder = MqttClientPayloadBuilder();
-                    builder.addString(jsonEncode(params));
+                    builder.addString(jsonEncode(main));
                     client.publishMessage(confTopic, MqttQos.atLeastOnce, builder.payload!);
+                    builder.clear();
+
+                    builder.addString(jsonEncode(thermo));
+                    client.publishMessage(thermoTopic, MqttQos.atLeastOnce, builder.payload!);
+                    builder.clear();
+
+                    builder.addString(jsonEncode(flush));
+                    client.publishMessage(flushTopic, MqttQos.atLeastOnce, builder.payload!);
+                    builder.clear();
 
                   },
                   child: Ink(
@@ -248,7 +337,7 @@ class _SettingsPageState extends State<SettingsPage>{
         .withWillMessage('My Will message')
         .startClean() // Non persistent session for testing
         .withWillQos(MqttQos.atLeastOnce);
-    print('EXAMPLE::Mosquitto client connecting....');
+    print('DW::Mosquitto client connecting....');
     client.connectionMessage = connMess;
 
     /// Connect the client, any errors here are communicated by raising of the appropriate exception. Note
@@ -258,21 +347,21 @@ class _SettingsPageState extends State<SettingsPage>{
       await client.connect('0022','123456');
     } on NoConnectionException catch (e) {
       // Raised by the client when connection fails.
-      print('EXAMPLE::client exception - $e');
+      print('DW::client exception - $e');
       client.disconnect();
     } on SocketException catch (e) {
       // Raised by the socket layer
-      print('EXAMPLE::socket exception - $e');
+      print('DW::socket exception - $e');
       client.disconnect();
     }
 
     /// Check we are connected
     if (client.connectionStatus!.state == MqttConnectionState.connected) {
-      print('EXAMPLE::Mosquitto client connected');
+      print('DW::Mosquitto client connected');
     } else {
       /// Use status here rather than state if you also want the broker return code.
       print(
-          'EXAMPLE::ERROR Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
+          'DW::ERROR Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
       client.disconnect();
       exit(-1);
     }
@@ -280,6 +369,8 @@ class _SettingsPageState extends State<SettingsPage>{
 
 
     client.subscribe(confTopic, MqttQos.atMostOnce);
+    client.subscribe(thermoTopic, MqttQos.atMostOnce);
+    client.subscribe(flushTopic, MqttQos.atMostOnce);
     client.subscribe(statusTopic, MqttQos.atMostOnce);
     client.subscribe(sensorTopic, MqttQos.atMostOnce);
 
@@ -299,8 +390,22 @@ class _SettingsPageState extends State<SettingsPage>{
       ///
       if(c[0].topic == confTopic) {
         setState(() {
-          params = jsonDecode(pt.toString());
-          print(params);
+          main = jsonDecode(pt.toString());
+          print(main);
+        });
+      }
+
+      if(c[0].topic == thermoTopic) {
+        setState(() {
+          thermo = jsonDecode(pt.toString());
+          print(thermo);
+        });
+      }
+
+      if(c[0].topic == flushTopic) {
+        setState(() {
+          flush = jsonDecode(pt.toString());
+          print(flush);
         });
       }
 
@@ -327,7 +432,7 @@ class _SettingsPageState extends State<SettingsPage>{
     /// publishing handshake with the broker.
     client.published!.listen((MqttPublishMessage message) {
       print(
-          'EXAMPLE::Published notification:: topic is ${message.variableHeader!.topicName}, with Qos ${message.header!.qos}');
+          'DW::Published notification:: topic is ${message.variableHeader!.topicName}, with Qos ${message.header!.qos}');
     });
 
 
@@ -336,38 +441,37 @@ class _SettingsPageState extends State<SettingsPage>{
   }
 
   void disconnect_Mqtt() {
-    print('EXAMPLE::Disconnecting');
+    print('DW::Disconnecting');
     client.disconnect();
-    print('EXAMPLE::Exiting normally');
+    print('DW::Exiting normally');
   }
 
   /// The subscribed callback
   void onSubscribed(String topic) {
-    print('EXAMPLE::Subscription confirmed for topic $topic');
+    print('DW::Subscription confirmed for topic $topic');
   }
 
   /// The unsolicited disconnect callback
   void onDisconnected() {
-    print('EXAMPLE::OnDisconnected client callback - Client disconnection');
+    print('DW::OnDisconnected client callback - Client disconnection');
     if (client.connectionStatus!.disconnectionOrigin ==
         MqttDisconnectionOrigin.solicited) {
-      print('EXAMPLE::OnDisconnected callback is solicited, this is correct');
+      print('DW::OnDisconnected callback is solicited, this is correct');
     } else {
       print(
-          'EXAMPLE::OnDisconnected callback is unsolicited or none, this is incorrect - exiting');
-      exit(-1);
+          'DW::OnDisconnected callback is unsolicited or none, this is incorrect - exiting');
     }
     if (pongCount == 3) {
-      print('EXAMPLE:: Pong count is correct');
+      print('DW:: Pong count is correct');
     } else {
-      print('EXAMPLE:: Pong count is incorrect, expected 3. actual $pongCount');
+      print('DW:: Pong count is incorrect, expected 3. actual $pongCount');
     }
   }
 
   /// The successful connect callback
   void onConnected() {
     print(
-        'EXAMPLE::OnConnected client callback - Client connection was successful');
+        'DW::OnConnected client callback - Client connection was successful');
   }
 
   /// Pong callback
@@ -376,7 +480,7 @@ class _SettingsPageState extends State<SettingsPage>{
     pongCount++;
   }
 
-  Widget buildParams() {
+  Widget buildParams(params) {
     var listParams = <Widget>[];
     if(params != null ) {
       params.forEach((key,value) {

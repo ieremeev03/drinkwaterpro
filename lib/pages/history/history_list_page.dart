@@ -82,6 +82,7 @@ class _HistoryListPageState extends StateMVC {
             ],),
         onRefresh: () async {
           setState(() {
+
             _controller.init();
             final state = _controller.currentState;
             //final history = _controller.;

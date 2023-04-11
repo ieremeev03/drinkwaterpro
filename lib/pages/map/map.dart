@@ -23,6 +23,7 @@ import 'package:drinkwaterpro/pages/home/block.dart';
 import 'package:drinkwaterpro/pages/settings/settings.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'dart:async';
 
 class MapPage extends StatefulWidget {
   @override
@@ -43,7 +44,9 @@ class _MapPageState extends StateMVC {
   }
   BitmapDescriptor? _pinLocationIcon;
   //late YandexMapController controllerY;
-  Completer<GoogleMapController> _controllerY = Completer();
+
+  GoogleMapController? mapController;
+
 
   var controllerStream = new StreamController<int>();
   int curDev = 0;
@@ -61,6 +64,16 @@ class _MapPageState extends StateMVC {
 // Map storing polylines created by connecting two points
   Map<PolylineId, Polyline> polylines = {};
   ScrollController _scrollcontroller = ScrollController();
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+
+    final center = _controller.currentPosition().then((value)  {
+      controller.animateCamera(CameraUpdate.newCameraPosition(value));
+    });
+  }
+
+
 
 
   Future<void> setupInteractedMessage() async {
@@ -161,7 +174,7 @@ class _MapPageState extends StateMVC {
           offset: Offset(0, 3), // changes position of shadow
         ),],
         panelBuilder: (_scrollcontroller) => Container(
-          margin: EdgeInsets.only(top: 80.0),
+          margin: EdgeInsets.only(top: 130.0), //отступ контента слайдера
           decoration: BoxDecoration(
             boxShadow: [BoxShadow(
               color: Colors.grey.withOpacity(0.5),
@@ -193,46 +206,72 @@ class _MapPageState extends StateMVC {
 
                 if (devices[index].id== curDev) {
 
-                 k1Text =  Column(
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                   children: [
-                     Text(devices[index].range_str, style: kStyleTextDefaultRed,),
-                     SizedBox(height: 7,),
-                     Row(
-                       mainAxisAlignment: MainAxisAlignment.center,
-                       children: [
-                         Text("Температура воды: ", style: kStyleTextDefault13,),
-                         Text(devices[index].temp.toString() + '°С', style: kStyleInputTextSecond600,),
+                  if(devices[index].online_payment==1) {
+                    k1Text = Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(devices[index].range_str,
+                          style: kStyleTextDefaultRed,),
+                        SizedBox(height: 7,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Температура воды: ",
+                              style: kStyleTextDefault13,),
+                            Text(devices[index].temp.toString() + '°С',
+                              style: kStyleInputTextSecond600,),
 
-                       ],),
-                     SizedBox(height: 3,),
-                     Row(
-                       mainAxisAlignment: MainAxisAlignment.center,
-                       children: [
-                         Text("Чистота (PPM) ", style: kStyleTextDefault13,),
-                         Text(devices[index].ppm.toString() + ' мг/л', style: kStyleInputTextSecond600Green,),
-                         SizedBox(width: 5,),
+                          ],),
+                        SizedBox(height: 3,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Чистота (PPM) ", style: kStyleTextDefault13,),
+                            Text(devices[index].ppm.toString() + ' мг/л',
+                              style: kStyleInputTextSecond600Green,),
+                            SizedBox(width: 5,),
 
-                         GestureDetector(
-                           onTap: () {
-                             Navigator.push(
-                                 context,
-                                 MaterialPageRoute(
-                                   builder: (context) => PouringPPMPage(),
-                                 ));
-                           },
-                           child:  FaIcon(
-                             FontAwesomeIcons.solidCircleQuestion,
-                             size: 15.0,
-                             color: Colors.blueAccent,
-                           ),),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PouringPPMPage(),
+                                    ));
+                              },
+                              child: FaIcon(
+                                FontAwesomeIcons.solidCircleQuestion,
+                                size: 15.0,
+                                color: Colors.blueAccent,
+                              ),),
 
 
+                          ],),
+                      ],);
+                    // print(devices[index].id);
+                  } else {
+                    k1Text = Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(devices[index].range_str,
+                          style: kStyleTextDefaultRed,),
+                        SizedBox(height: 7,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/img/no_online_payment.png',
+                              width: 20,
+                            ),
+                            SizedBox(width: 7,),
+                            Text('оплата через приложение \nвременно не доступна',
+                              style: kStyleTextDefaultRed,),
 
-                       ],),
+                          ],),
 
-                   ],);
-                 // print(devices[index].id);
+
+                      ],);
+                  }
                 } else {
                   k1Text =  Text(devices[index].range_str, style: kStyleTextDefault
                 );
@@ -244,14 +283,21 @@ class _MapPageState extends StateMVC {
                     children: [
                       InkWell(
 
-                        onTap: () {
-                        /*  _controllerY.animateCamera(
-                              CameraUpdate.newCameraPosition(
-                                    CameraPosition(
-                                      target: LatLng( double.parse(devices[index].latitude), double.parse(devices[index].longitude))
-                                    )
-                              )
-                          );*/
+                        onTap: ()  {
+                          setState((){
+                            curDev = devices[index].id!;
+                          });
+
+                          mapController?.moveCamera(
+                            CameraUpdate.newCameraPosition(
+                               CameraPosition(
+                                bearing: 270.0,
+                                target: LatLng(double.parse(devices[index].latitude), double.parse(devices[index].longitude)),
+                                tilt: 30.0,
+                                zoom: 17.0,
+                              ),
+                            ),
+                          );
                         },
 
                         child:  Row(
@@ -354,7 +400,7 @@ class _MapPageState extends StateMVC {
         ),
         defaultPanelState: PanelState.OPEN,
         maxHeight: panelHeightOpened,
-        minHeight: 100,
+        minHeight: 150,
         borderRadius: BorderRadius.vertical(top: Radius.circular(90)),
         parallaxEnabled: true,
         parallaxOffset: .9,
@@ -362,9 +408,9 @@ class _MapPageState extends StateMVC {
         body:  Container(
           child: GoogleMap(
               polylines: Set<Polyline>.of(polylines.values),
-              mapToolbarEnabled: true,
+              //mapToolbarEnabled: true,
               myLocationEnabled: true,
-              myLocationButtonEnabled: true,
+              myLocationButtonEnabled: false,
               //buildingsEnabled: true,
               //liteModeEnabled: true,
               mapType: MapType.normal,
@@ -373,11 +419,7 @@ class _MapPageState extends StateMVC {
                 target: LatLng(37.42796133580664, -122.085749655962),
                 zoom: 14.4746,
               ),
-            onMapCreated: (GoogleMapController controllerY) async {
-              final center = _controller.currentPosition().then((value)  {
-                controllerY.animateCamera(CameraUpdate.newCameraPosition(value));
-              });
-            },
+            onMapCreated:  _onMapCreated,
           )
 
         ),
@@ -385,62 +427,99 @@ class _MapPageState extends StateMVC {
           //padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
           //margin: EdgeInsets.fromLTRB(0, 0, 0, 40),
           //height: 50,
+          
           width: MediaQuery.of(context).size.width,
-          child: Center(
-            child: ElevatedButton(
-              style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                  shadowColor: MaterialStateProperty.all(Colors.transparent),
-                  fixedSize: MaterialStateProperty.all(const Size(270, 60)),
-                  padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0),
-                      )
-                  )
-              ),
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => QrPage()));
-              },
-              child: Ink(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(18.0)) ,
-                  gradient: LinearGradient(colors: [
-                    Color.fromRGBO(68, 191, 254, 1),
-                    Color.fromRGBO(25, 159, 227, 1),
-                  ]),
-                ),
-                child: Container(
-                    width: 270,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(18.0)) ,
-                    ) ,
-                    padding: const EdgeInsets.all(15),
-                    constraints: const BoxConstraints(minWidth: 88.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Сканировать QR', textAlign: TextAlign.center, style: kStyleButtonTextNew,),
-                        SizedBox(width: 7,),
-                        FaIcon(FontAwesomeIcons.qrcode,size: 15.0, color: Colors.white,)
+          child: Column(
 
-                      ],)
+            children: [
 
+            Container(
+              width: MediaQuery.of(context).size.width,
+              alignment: Alignment.topRight,
+              padding: EdgeInsets.only(right: 20),
+              child: CircleAvatar(
+                radius: 20,
+                backgroundColor: Color(0xffffffff),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.my_location,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                   
 
+                    mapController?.moveCamera(
+                        CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                              bearing: 0,
+                              target: LatLng(globals.userLat!, globals.userLon!),
+                              zoom: 17.0,
+                            )
+                        )
+                    );
 
+                  },
                 ),
               ),
+
             ),
+            SizedBox(height: 10,),
+            Center(
+              child: ElevatedButton(
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                    shadowColor: MaterialStateProperty.all(Colors.transparent),
+                    fixedSize: MaterialStateProperty.all(const Size(270, 60)),
+                    padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                        )
+                    )
+                ),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => QrPage()));
+                },
+                child: Ink(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(18.0)) ,
+                    gradient: LinearGradient(colors: [
+                      Color.fromRGBO(68, 191, 254, 1),
+                      Color.fromRGBO(25, 159, 227, 1),
+                    ]),
+                  ),
+                  child: Container(
+                      width: 270,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(18.0)) ,
+                      ) ,
+                      padding: const EdgeInsets.all(15),
+                      constraints: const BoxConstraints(minWidth: 88.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Сканировать QR', textAlign: TextAlign.center, style: kStyleButtonTextNew,),
+                          SizedBox(width: 7,),
+                          FaIcon(FontAwesomeIcons.qrcode,size: 15.0, color: Colors.white,)
+
+                        ],)
+
+
+
+                  ),
+                ),
+              ),
 
 
 
 
-          )
+            )
+          ],)
         ),
         collapsed: Center(
           child: Container(
-            margin: EdgeInsets.only(top: 75.0),
+            margin: EdgeInsets.only(top: 127.0), //отступ плашки для разворачивания
             height: 3,
             width: 30,
             decoration: BoxDecoration(
@@ -488,29 +567,7 @@ class _MapPageState extends StateMVC {
               items: [dev],
             );
 
-            if(globals.service==1)  {
 
-              _controller.getDevice(value.id.toString(),  (status) {
-                if (status is DeviceInfoSuccess) {
-
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SettingsPage(),
-                      ));
-
-                } else {
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Ошибка подключения"))
-                  );
-                }
-              });
-
-
-
-
-            } else {
               setState((){
                 curDev = value.id!;
                 print(curDev);
@@ -519,7 +576,7 @@ class _MapPageState extends StateMVC {
                   _scrollcontroller.position.maxScrollExtent,
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeOut);
-            }
+
           }  ,
           icon: _pinLocationIcon!,
           //icon: BitmapDescriptor.defaultMarker,
@@ -569,13 +626,14 @@ class _MapPageState extends StateMVC {
     print(destinationLatitude);
     print(destinationLongitude);
 
-    String tok = 'AIzaSyChGXUSisd7kq8SlxNv5EUpiADDEXpv5Lo';
+    String tok = 'AIzaSyD0tOhELGualv9g0x0Tw6vm3BaUFHnwSLw';
 
     if (Platform.isIOS) {tok = 'AIzaSyD1QvAX3Ic_m40SMJvwimLGcfRbOQ1Qyyg';}
     polylinePoints = PolylinePoints();
 
     // Generating the list of coordinates to be used for
     // drawing the polylines
+    print(tok);
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       tok, // Google Maps API Key
       PointLatLng(startLatitude, startLongitude),

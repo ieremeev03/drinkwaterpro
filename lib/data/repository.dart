@@ -11,7 +11,7 @@ import 'package:drinkwaterpro/models/device.dart';
 import 'package:drinkwaterpro/models/payment.dart';
 import 'package:drinkwaterpro/data/database.dart';
 
-import 'package:flutter_yookassa_sdk/flutter_yookassa_sdk.dart';
+import 'package:yookassa_payments_flutter/yookassa_payments_flutter.dart';
 import 'package:http_client/console.dart';
 import 'package:drinkwaterpro/data/globals.dart' as globals;
 
@@ -67,8 +67,6 @@ class Repository {
   }
 
 
-
-
   Future<PouringList> fetchPourings() async {
     // сначала создаем URL, по которому
     // мы будем делать запрос
@@ -106,10 +104,12 @@ class Repository {
       // если все ок то возвращаем посты
       // json.decode парсит ответ
       print('DEVICE: список получен');
+      add_log('DEVICE: список получен');
       //print(response.body);
       return DeviceList.fromJson(json.decode(response.body));
     } else {
       print('DEVICE: ошибка получения');
+      add_log('DEVICE: ошибка получения');
       // в противном случае вызываем исключение
       throw Exception("failed request");
     }
@@ -249,35 +249,37 @@ class Repository {
   }
 
 
-  Future<String> checkout(phone) async {
+  Future<TokenizationResult> checkout(phone) async {
     print('PAYMENT: создание платежа');
+    List<PaymentMethod> paymentMethodTypes = [];
+    paymentMethodTypes.add(PaymentMethod.bankCard);
     final inputData = TokenizationModuleInputData(
       clientApplicationKey: "live_OTM1Mjkz0_CGHpGEgGN-IEGtJkbLvD7rQnSvcihC8vY",
-      shopName: "Налей Воды",
-      purchaseDescription: "Авторизация карты",
-      amount: const Amount(value: 1, currency: Currency.rub()),
+      title: "Авторизация карты",
+      subtitle: "Авторизация карты",
+      amount: Amount(value: 1, currency: Currency.rub),
       savePaymentMethod: SavePaymentMethod.on,
       shopId: '935293',
       userPhoneNumber: phone,
       customerId: phone,
       isLoggingEnabled: true,
       tokenizationSettings: TokenizationSettings(
-        paymentMethodTypes: PaymentMethodTypes.bankCard(),
-        showYooKassaLogo: false,
+          PaymentMethodTypes(paymentMethodTypes)
       ),
     );
-    try {
-      final paymentData = await FlutterYookassaSdk.instance.tokenization(inputData);
-      print('YOOMONEY CHECKOUT: '+paymentData.token.toString());
-      return paymentData.token.toString();
-    } on YooKassaException catch (error) {
-      print('YOOMONEY CHECKOUT: '+error.toString());
-      return error.toString();
-    }
+
+      var result =
+      await YookassaPaymentsFlutter.tokenization(inputData);
+
+      return result;
+
+
+
+
   }
 
 
-  Future<Map> auth(token, value, description) async {
+  Future<Map> auth(token, value, description, paymentMethod) async {
     final idempotenceKey = 'some_unique_idempotence_key' +
         DateTime.now().microsecondsSinceEpoch.toString();
     Map paymentResult;
@@ -298,11 +300,12 @@ class Repository {
           },
           "confirmation": {
             "type": "redirect",
-            "return_url": "https://4081d9747ee2.ngrok.io/v1.3/verifications/yandex_checkout"
+            "return_url": "https://lk.drinkwater.pro"
           },
           'capture' : true,
           "description": "$description"
         }));
+
 
 
     request.headers.add("Idempotence-Key", idempotenceKey);
@@ -318,13 +321,13 @@ class Repository {
     //print(paymentResult['confirmation']);
     print(paymentResult);
 
-    final payResult =  await FlutterYookassaSdk.instance.confirm3dsCheckout(
-      confirmationUrl: paymentResult['confirmation']['confirmation_url'],
-      paymentMethodType: paymentResult['payment_method']['type'],
+    final payResult =  await YookassaPaymentsFlutter.confirmation(
+      paymentResult['confirmation']['confirmation_url'],
+      paymentMethod,
     );
 
-    return paymentResult;
 
+    return paymentResult;
   }
 
   Future<Map> info(payment) async {
@@ -417,6 +420,18 @@ class Repository {
     if (response.statusCode == 200) {
       print('Метод добавлен: ' + response.body);
       add_log('PAYMENT: Метод оплаты добавлен на сервер');
+
+      final jeggingsWithQuantity = AnalyticsEventItem(
+        itemName: pay['payment_method']['card']['first6']+ "** **** **** "+pay['payment_method']['card']['last4'],
+        itemCategory: "Bank Card",
+        itemBrand: pay['payment_method']['card']['card_type'],
+      );
+
+      await FirebaseAnalytics.instance.logAddPaymentInfo(
+        currency: 'RUB',
+        paymentType: pay['payment_method']['card']['card_type'],
+        items: [jeggingsWithQuantity]);
+
       return paymentFromJson(response.body);
     } else {
       print('error ' + response.body);
@@ -518,7 +533,6 @@ class Repository {
       add_log("POURING: Налив не найден");
       throw Exception("Налив не найден");
     }
-
   }
 
   Future<Pouring> setPayServer(token , order, summ, uuid) async {
@@ -704,7 +718,6 @@ class Repository {
     add_log(url.toString());
     // делаем GET запрос
     final response = await http.get(url,
-
         headers: { 'Authorization': 'Bearer $token_api', 'Content-Type': 'application/json'}
     );
     //print(url);
@@ -735,6 +748,21 @@ class Repository {
         if (setting['key'] == 'blockMessage') {
           globals.blockMessage =  setting['value'];
           print('Settings blockMessage: '+globals.blockMessage.toString());
+        }
+
+        if (setting['key'] == 'android') {
+          globals.androidVersion =  setting['value'];
+          print('Settings androidVersion: '+globals.androidVersion.toString());
+        }
+
+        if (setting['key'] == 'ios') {
+          globals.iosVersion =  setting['value'];
+          print('Settings iosVersion: '+globals.iosVersion.toString());
+        }
+
+        if (setting['key'] == 'updateMessage') {
+          globals.updateMessage =  setting['value'];
+          print('Settings updateMessage: '+globals.updateMessage.toString());
         }
 
       });

@@ -48,31 +48,6 @@ class _PouringFinalPageState extends StateMVC with TickerProviderStateMixin {
     super.initState();
 
     _controllerPay = PaymentController();
-    _controller.getLastPouring(
-            (status) {
-          if (status is LastPouringSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Налив получен"))
-            );
-
-            _controllerPay!.pay(globals.currentPaymentMethod, globals.summ, globals.liters, (statusPay) {
-              if (statusPay is PaySuccess) {
-              } else {
-                setState((){});
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Ошибка оплаты"))
-                );
-              }
-            });
-
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Ошибка получения налива"))
-            );
-          }
-        });
-
-
 
   }
 
@@ -101,79 +76,7 @@ class _PouringFinalPageState extends StateMVC with TickerProviderStateMixin {
   Widget _buildContent() {
     final state = _controller.lastPouring;
 
-    if (state is LastPouringLoading) {
-      // загрузка
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    } else if (state is LastPouringFailure) {
-      return Column(children: [
-        Spacer(),
-        Center(
-          child: Text(
-              'Вы не совершили налив',
-              textAlign: TextAlign.center,
-              style: kStyleLabelForm
-          ),
-        ),
-        Spacer(),
-
-        ElevatedButton(
-          style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.transparent),
-              shadowColor: MaterialStateProperty.all(Colors.transparent),
-              fixedSize: MaterialStateProperty.all(const Size(150, 60)),
-              padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                  )
-              )
-          ),
-          onPressed: () async {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MapPage(),
-              ),
-                  (Route<dynamic> route) => false,
-            );
-          },
-          child: Ink(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(18.0)),
-              gradient: LinearGradient(colors: [
-                Color.fromRGBO(68, 191, 254, 1),
-                Color.fromRGBO(25, 159, 227, 1),
-              ]),
-            ),
-            child: Container(
-                width: 150,
-                height: 60,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(18.0)),
-                ),
-                padding: const EdgeInsets.all(15),
-                constraints: const BoxConstraints(minWidth: 88.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Спасибо',
-                      textAlign: TextAlign.center,
-                      style: kStyleButtonTextNew,
-                    ),
-
-                  ],
-                )),
-          ),
-        ),
-        SizedBox(
-          height: 60,
-        ),
-      ],);
-    } else {
-      return Padding(
+    return Padding(
         padding: const EdgeInsets.fromLTRB(50, 20, 50, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -181,14 +84,6 @@ class _PouringFinalPageState extends StateMVC with TickerProviderStateMixin {
             Spacer(),
             Text("Вкусная питьевая вода теперь в вашей бутылке", style: kStyle17SizeBlue600,  textAlign: TextAlign.center, ),
             Waterani3(width: 200, height: 200,),
-            SizedBox(
-              height: 60,
-            ),
-            Text("Воды налито: "+ globals.liters.toString() +" " + num2liters(globals.liters), style:  kStyleTextDefault16),
-            SizedBox(height: 10,),
-            Text("Стоимость: "+ globals.summ.toString() +" " + num2rub(globals.summ), style:  kStyleTextDefault16),
-            SizedBox(height: 10,),
-            Text(globals.payStatus, style: kStyleTextDefaultRed, textAlign: TextAlign.center,),
             Spacer(),
             ElevatedButton(
               style: ButtonStyle(
@@ -235,7 +130,6 @@ class _PouringFinalPageState extends StateMVC with TickerProviderStateMixin {
                           textAlign: TextAlign.center,
                           style: kStyleButtonTextNew,
                         ),
-
                       ],
                     )),
               ),
@@ -249,9 +143,8 @@ class _PouringFinalPageState extends StateMVC with TickerProviderStateMixin {
           ],
         ),
       );
-    }
-  }
 
+  }
 
   String num2liters(num) {
     num = num%100;

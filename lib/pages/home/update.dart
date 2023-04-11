@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:drinkwaterpro/pages/history/history_detail_page.dart';
-
+import 'dart:io';
 import 'package:mvc_pattern/mvc_pattern.dart';
 import '../../models/pouring.dart';
 import '../../controllers/history_controller.dart';
@@ -10,17 +10,18 @@ import 'package:drinkwaterpro/pages/history/water-ani-4.dart';
 import 'package:drinkwaterpro/data/globals.dart' as globals;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:drinkwaterpro/pages/home/home_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 //final List<Pouring> Pourings = <Pouring>[Pouring("Мира 113", 5, 15, '21 марта 2022'), Pouring("Мира 113", 10, 30, '20 марта 2022'), Pouring("Ленина 66", 19, 53, '22 марта 2022'), Pouring("Мира 113", 10, 30, '20 марта 2022'), Pouring("Мира 113", 5, 15, '21 марта 2022'), Pouring("Мира 113", 10, 30, '20 марта 2022'), Pouring("Ленина 66", 19, 53, '22 марта 2022'), Pouring("Мира 113", 10, 30, '20 марта 2022') ];
 
 
-class BlockPage extends StatefulWidget {
+class UpdatePage extends StatefulWidget {
   @override
-  _BlockPageState createState() => _BlockPageState();
+  _UpdatePageState createState() => _UpdatePageState();
 }
 
 // не забываем расширяться от StateMVC
-class _BlockPageState extends StateMVC {
+class _UpdatePageState extends StateMVC {
 
   // после инициализации состояние
   // мы запрашивает данные у сервера
@@ -35,7 +36,7 @@ class _BlockPageState extends StateMVC {
       appBar: AppBar(
         shadowColor: Colors.white70,
         centerTitle: true,
-        title:  Text('Информация', style: kStyleTextPageTitle,),
+        title:  Text('Обновление', style: kStyleTextPageTitle,),
       ),
       body: _buildContent(),
       backgroundColor: Colors.white,
@@ -51,7 +52,7 @@ class _BlockPageState extends StateMVC {
         Waterani4(width: 200, height: 200,),
         Center(
           child: Text(
-              globals.blockMessage,
+              globals.updateMessage,
               textAlign: TextAlign.center,
               style: kStyleLabelForm
           ),
@@ -71,11 +72,18 @@ class _BlockPageState extends StateMVC {
           ),
           onPressed: () {
 
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HomePage(),
-                ));
+            if (Platform.isAndroid || Platform.isIOS) {
+              final url = Uri.parse(
+                Platform.isAndroid
+                    ? "https://play.google.com/store/apps/details?id=pro.enaza.drinkwater"
+                    : "https://apps.apple.com/ru/app/%D0%BD%D0%B0%D0%BB%D0%B5%D0%B9-%D0%B2%D0%BE%D0%B4%D1%8B/id1627990072",
+              );
+              launchUrl(
+                url,
+                mode: LaunchMode.externalApplication,
+              );
+            }
+
           },
           child: Ink(
             decoration: BoxDecoration(

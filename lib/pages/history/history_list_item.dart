@@ -3,6 +3,7 @@ import '../../models/pouring.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:drinkwaterpro/pages/style.dart';
 import 'package:intl/intl.dart';
+import 'package:drinkwaterpro/data/globals.dart' as globals;
 
 // элемент списка
 class HistoryListItem extends StatelessWidget {
@@ -23,7 +24,7 @@ class HistoryListItem extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("${pouring.liters!} "+   "л",
+                  Text("${pouring.liters!.toStringAsFixed(2)} "+   "л",
                       style:
                       TextStyle(
                         fontSize: 16,
@@ -31,8 +32,14 @@ class HistoryListItem extends StatelessWidget {
                         color: Colors.black,
                       )),
                   SizedBox(height: 10,),
-                  Text('ул. '+ pouring.address!,
-                      style: kStyleTextDefault15),
+                    Container(
+                      width: 220,
+                      child: Text(
+                      'ул. '+ pouring.address!,
+                      style: kStyleTextDefault15,
+                      softWrap: true,
+                    ),),
+
                   SizedBox(height: 14,),
                   Text(DateFormat('dd.MM.yyyy hh:mm').format(pouring.date!),
                       style:
@@ -47,10 +54,10 @@ class HistoryListItem extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text("${pouring.summ!} " +  'руб.', style: kStyleInputTextSecond600,),
+                  Text("${pouring.summ!.toStringAsFixed(2)} " +  'руб.', style: kStyleInputTextSecond600,),
                   SizedBox(height: 7,),
                   Row(children: [
-                    Text(pouring.last4.toString(), style: kStyleTextDefault15,),
+                    _getTextCard(pouring.last4),
                     SizedBox(width: 10,),
                     _getIcon(pouring.card_type),
                   ],)
@@ -88,6 +95,18 @@ class HistoryListItem extends StatelessWidget {
       default:
         return FaIcon(FontAwesomeIcons.creditCard,size: 20.0, color: kTextDefaultColor,);
     }
+  }
+
+  Widget  _getTextCard(last4){
+   if (last4 != null && last4 != "") {
+     //print(last4);
+     return  Text(last4.toString(), style: kStyleTextDefault15);
+   } else {
+     globals.blockPouring = true;
+     return TextButton(
+         onPressed: () => null,
+         child: Text("", style: TextStyle(color: kTextRedColor), ));
+   }
   }
 
 }
